@@ -1,6 +1,6 @@
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1229,6 +1229,14 @@ config SOCIONEXT_SYNQUACER_PREITS
+@@ -1247,6 +1247,14 @@ config SOCIONEXT_SYNQUACER_PREITS
  
  	  If unsure, say Y.
  

@@ -17,7 +17,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  #define ITS_FLAGS_FORCE_NON_SHAREABLE		(1ULL << 3)
  
  #define RD_LOCAL_LPI_ENABLED                    BIT(0)
-@@ -2201,6 +2202,11 @@ static struct page *its_allocate_prop_ta
+@@ -2206,6 +2207,11 @@ static struct page *its_allocate_prop_ta
  {
  	struct page *prop_page;
  
@@ -29,7 +29,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	prop_page = alloc_pages(gfp_flags, get_order(LPI_PROPBASE_SZ));
  	if (!prop_page)
  		return NULL;
-@@ -2324,6 +2330,7 @@ static int its_setup_baser(struct its_no
+@@ -2329,6 +2335,7 @@ static int its_setup_baser(struct its_no
  	u32 alloc_pages, psz;
  	struct page *page;
  	void *base;
@@ -37,7 +37,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  
  	psz = baser->psz;
  	alloc_pages = (PAGE_ORDER_TO_SIZE(order) / psz);
-@@ -2335,7 +2342,10 @@ static int its_setup_baser(struct its_no
+@@ -2340,7 +2347,10 @@ static int its_setup_baser(struct its_no
  		order = get_order(GITS_BASER_PAGES_MAX * psz);
  	}
  
@@ -49,7 +49,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	if (!page)
  		return -ENOMEM;
  
-@@ -2385,6 +2395,13 @@ retry_baser:
+@@ -2390,6 +2400,13 @@ retry_baser:
  	its_write_baser(its, baser, val);
  	tmp = baser->val;
  
@@ -63,7 +63,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	if ((val ^ tmp) & GITS_BASER_SHAREABILITY_MASK) {
  		/*
  		 * Shareability didn't stick. Just use
-@@ -2971,6 +2988,10 @@ static struct page *its_allocate_pending
+@@ -2980,6 +2997,10 @@ static struct page *its_allocate_pending
  {
  	struct page *pend_page;
  
@@ -74,27 +74,27 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	pend_page = alloc_pages(gfp_flags | __GFP_ZERO,
  				get_order(LPI_PENDBASE_SZ));
  	if (!pend_page)
-@@ -3126,6 +3147,9 @@ static void its_cpu_init_lpis(void)
+@@ -3135,6 +3156,9 @@ static void its_cpu_init_lpis(void)
  	gicr_write_propbaser(val, rbase + GICR_PROPBASER);
  	tmp = gicr_read_propbaser(rbase + GICR_PROPBASER);
  
 +	if (gic_rdists->flags & ITS_FLAGS_FORCE_NO_LOCAL_CACHE)
 +		tmp &= ~GICR_PROPBASER_SHAREABILITY_MASK;
 +
- 	if (gic_rdists->flags & RDIST_FLAGS_FORCE_NON_SHAREABLE)
+ 	if (!rdists_support_shareable())
  		tmp &= ~GICR_PROPBASER_SHAREABILITY_MASK;
  
-@@ -3153,6 +3177,9 @@ static void its_cpu_init_lpis(void)
+@@ -3162,6 +3186,9 @@ static void its_cpu_init_lpis(void)
  	gicr_write_pendbaser(val, rbase + GICR_PENDBASER);
  	tmp = gicr_read_pendbaser(rbase + GICR_PENDBASER);
  
 +	if (gic_rdists->flags & ITS_FLAGS_FORCE_NO_LOCAL_CACHE)
 +		tmp &= ~GICR_PENDBASER_SHAREABILITY_MASK;
 +
- 	if (gic_rdists->flags & RDIST_FLAGS_FORCE_NON_SHAREABLE)
+ 	if (!rdists_support_shareable())
  		tmp &= ~GICR_PENDBASER_SHAREABILITY_MASK;
  
-@@ -3319,7 +3346,12 @@ static bool its_alloc_table_entry(struct
+@@ -3328,7 +3355,12 @@ static bool its_alloc_table_entry(struct
  
  	/* Allocate memory for 2nd level table */
  	if (!table[idx]) {
@@ -108,7 +108,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  					get_order(baser->psz));
  		if (!page)
  			return false;
-@@ -3408,6 +3440,7 @@ static struct its_device *its_create_dev
+@@ -3417,6 +3449,7 @@ static struct its_device *its_create_dev
  	int nr_lpis;
  	int nr_ites;
  	int sz;
@@ -116,7 +116,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  
  	if (!its_alloc_device_table(its, dev_id))
  		return NULL;
-@@ -3415,7 +3448,11 @@ static struct its_device *its_create_dev
+@@ -3424,7 +3457,11 @@ static struct its_device *its_create_dev
  	if (WARN_ON(!is_power_of_2(nvecs)))
  		nvecs = roundup_pow_of_two(nvecs);
  
@@ -129,7 +129,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	/*
  	 * Even if the device wants a single LPI, the ITT must be
  	 * sized as a power of two (and you need at least one bit...).
-@@ -3423,7 +3460,7 @@ static struct its_device *its_create_dev
+@@ -3432,7 +3469,7 @@ static struct its_device *its_create_dev
  	nr_ites = max(2, nvecs);
  	sz = nr_ites * (FIELD_GET(GITS_TYPER_ITT_ENTRY_SIZE, its->typer) + 1);
  	sz = max(sz, ITS_ITT_ALIGN) + ITS_ITT_ALIGN - 1;
@@ -138,7 +138,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	if (alloc_lpis) {
  		lpi_map = its_lpi_alloc(nvecs, &lpi_base, &nr_lpis);
  		if (lpi_map)
-@@ -4762,6 +4799,13 @@ static bool its_set_non_coherent(void *d
+@@ -4779,6 +4816,13 @@ static bool its_set_non_coherent(void *d
  	return true;
  }
  
@@ -152,7 +152,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  static const struct gic_quirk its_quirks[] = {
  #ifdef CONFIG_CAVIUM_ERRATUM_22375
  	{
-@@ -4816,6 +4860,14 @@ static const struct gic_quirk its_quirks
+@@ -4833,6 +4877,14 @@ static const struct gic_quirk its_quirks
  		.init   = its_enable_rk3588001,
  	},
  #endif
@@ -167,15 +167,15 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	{
  		.desc   = "ITS: non-coherent attribute",
  		.property = "dma-noncoherent",
-@@ -5077,6 +5129,7 @@ static int __init its_probe_one(struct i
+@@ -5094,6 +5146,7 @@ static int __init its_probe_one(struct i
  	struct page *page;
  	u32 ctlr;
  	int err;
 +	gfp_t gfp_flags;
  
- 	if (is_v4(its)) {
- 		if (!(its->typer & GITS_TYPER_VMOVP)) {
-@@ -5108,7 +5161,9 @@ static int __init its_probe_one(struct i
+ 	its_enable_quirks(its);
+ 
+@@ -5127,7 +5180,9 @@ static int __init its_probe_one(struct i
  		}
  	}
  
@@ -186,7 +186,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  				get_order(ITS_CMD_QUEUE_SZ));
  	if (!page) {
  		err = -ENOMEM;
-@@ -5134,6 +5189,9 @@ static int __init its_probe_one(struct i
+@@ -5153,6 +5208,9 @@ static int __init its_probe_one(struct i
  	gits_write_cbaser(baser, its->base + GITS_CBASER);
  	tmp = gits_read_cbaser(its->base + GITS_CBASER);
  
