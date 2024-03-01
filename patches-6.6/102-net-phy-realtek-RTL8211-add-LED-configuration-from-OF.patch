@@ -4,9 +4,11 @@ Date: Mon, 3 Apr 2023 23:26:04 +0800
 Subject: [PATCH] net: phy: realtek: add LED configuration from OF for 8211f
 
 ---
- drivers/net/phy/realtek.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ drivers/net/phy/realtek.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
+diff --git a/drivers/net/phy/realtek.c b/drivers/net/phy/realtek.c
+index 337899c69..6d3b30473 100644
 --- a/drivers/net/phy/realtek.c
 +++ b/drivers/net/phy/realtek.c
 @@ -28,6 +28,8 @@
@@ -18,7 +20,7 @@ Subject: [PATCH] net: phy: realtek: add LED configuration from OF for 8211f
  #define RTL8211F_PHYCR1				0x18
  #define RTL8211F_PHYCR2				0x19
  #define RTL8211F_INSR				0x1d
-@@ -356,6 +358,7 @@ static int rtl8211f_config_init(struct p
+@@ -347,6 +349,7 @@ static int rtl8211f_config_init(struct phy_device *phydev)
  	struct rtl821x_priv *priv = phydev->priv;
  	struct device *dev = &phydev->mdio.dev;
  	u16 val_txdly, val_rxdly;
@@ -26,9 +28,9 @@ Subject: [PATCH] net: phy: realtek: add LED configuration from OF for 8211f
  	int ret;
  
  	ret = phy_modify_paged_changed(phydev, 0xa43, RTL8211F_PHYCR1,
-@@ -432,6 +435,15 @@ static int rtl8211f_config_init(struct p
+@@ -422,6 +425,15 @@ static int rtl8211f_config_init(struct phy_device *phydev)
+ 			return ret;
  		}
- 	}
  
 +	ret = of_property_read_u32(dev->of_node,
 +				   "realtek,led-data", &led_data);
@@ -39,6 +41,9 @@ Subject: [PATCH] net: phy: realtek: add LED configuration from OF for 8211f
 +		phy_write(phydev, RTL821x_PAGE_SELECT, 0x0);
 +	}
 +
- 	return genphy_soft_reset(phydev);
- }
+ 		return genphy_soft_reset(phydev);
+ 	}
  
+-- 
+2.42.0
+
