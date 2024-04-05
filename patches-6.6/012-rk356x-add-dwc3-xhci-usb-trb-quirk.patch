@@ -18,7 +18,7 @@
  
 --- a/drivers/usb/dwc3/core.c
 +++ b/drivers/usb/dwc3/core.c
-@@ -1572,6 +1572,8 @@ static void dwc3_get_properties(struct d
+@@ -1574,6 +1574,8 @@ static void dwc3_get_properties(struct d
  				"snps,dis-del-phy-power-chg-quirk");
  	dwc->dis_tx_ipgap_linecheck_quirk = device_property_read_bool(dev,
  				"snps,dis-tx-ipgap-linecheck-quirk");
@@ -39,7 +39,7 @@
   * @resume_hs_terminations: Set if we enable quirk for fixing improper crc
   *			generation after resume from suspend.
   * @ulpi_ext_vbus_drv: Set to confiure the upli chip to drives CPEN pin
-@@ -1331,6 +1334,7 @@ struct dwc3 {
+@@ -1332,6 +1335,7 @@ struct dwc3 {
  	unsigned		dis_u2_freeclk_exists_quirk:1;
  	unsigned		dis_del_phy_power_chg_quirk:1;
  	unsigned		dis_tx_ipgap_linecheck_quirk:1;
@@ -73,7 +73,7 @@
  	}
 --- a/drivers/usb/host/xhci-ring.c
 +++ b/drivers/usb/host/xhci-ring.c
-@@ -3599,6 +3599,7 @@ int xhci_queue_bulk_tx(struct xhci_hcd *
+@@ -3605,6 +3605,7 @@ int xhci_queue_bulk_tx(struct xhci_hcd *
  	bool more_trbs_coming = true;
  	bool need_zero_pkt = false;
  	bool first_trb = true;
@@ -81,7 +81,7 @@
  	unsigned int num_trbs;
  	unsigned int start_cycle, num_sgs = 0;
  	unsigned int enqd_len, block_len, trb_buff_len, full_len;
-@@ -3635,6 +3636,13 @@ int xhci_queue_bulk_tx(struct xhci_hcd *
+@@ -3641,6 +3642,13 @@ int xhci_queue_bulk_tx(struct xhci_hcd *
  	if (urb->transfer_flags & URB_ZERO_PACKET && urb_priv->num_tds > 1)
  		need_zero_pkt = true;
  
@@ -95,7 +95,7 @@
  	td = &urb_priv->td[0];
  
  	/*
-@@ -3663,6 +3671,13 @@ int xhci_queue_bulk_tx(struct xhci_hcd *
+@@ -3669,6 +3677,13 @@ int xhci_queue_bulk_tx(struct xhci_hcd *
  			first_trb = false;
  			if (start_cycle == 0)
  				field |= TRB_CYCLE;
@@ -109,7 +109,7 @@
  		} else
  			field |= ring->cycle_state;
  
-@@ -3671,6 +3686,8 @@ int xhci_queue_bulk_tx(struct xhci_hcd *
+@@ -3677,6 +3692,8 @@ int xhci_queue_bulk_tx(struct xhci_hcd *
  		 */
  		if (enqd_len + trb_buff_len < full_len) {
  			field |= TRB_CHAIN;
