@@ -30,10 +30,11 @@ set_smp_affinity() {
 start() {
 	case "$(board_name)" in
 		friendlyarm,nanopi-r5s)
-			set_smp_affinity "1" "nvme0q1"
-			set_smp_affinity "4" "nvme0q2"
-			set_smp_affinity "2" "nvme0q3"
-			set_smp_affinity "8" "nvme0q4"
+			set_smp_affinity "1" "nvme0q0"
+			set_smp_affinity "2" "nvme0q1"
+			set_smp_affinity "1" "nvme0q2"
+			set_smp_affinity "1" "nvme0q3"
+			set_smp_affinity "2" "nvme0q4"
 		;;
 	esac
 }
