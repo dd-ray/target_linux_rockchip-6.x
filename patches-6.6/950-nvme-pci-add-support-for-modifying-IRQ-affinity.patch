@@ -1,0 +1,60 @@
+From 0ac490bde726d22ce3bde0e41cec9858f71d7616 Mon Sep 17 00:00:00 2001
+From: sbwml <admin@cooluc.com>
+Date: Mon, 15 Apr 2024 06:36:21 +0800
+Subject: [PATCH] nvme-pci: add support for modifying IRQ affinity
+
+By default the kernel uses managed IRQ, but on lower performance devices it may occur that the nvme interrupt is on the same core as the eth network card interrupt, which may result in reduced transfer performance.
+
+Modify the nvme pci controller to allow users to modify interrupt affinity according to their actual needs for better performance.
+
+Signed-off-by: sbwml <admin@cooluc.com>
+---
+ drivers/nvme/host/pci.c | 23 +++++++++++++++++------
+ 1 file changed, 17 insertions(+), 6 deletions(-)
+
+--- a/drivers/nvme/host/pci.c
++++ b/drivers/nvme/host/pci.c
+@@ -456,10 +456,8 @@ static void nvme_pci_map_queues(struct b
+ 		 * affinity), so use the regular blk-mq cpu mapping
+ 		 */
+ 		map->queue_offset = qoff;
+-		if (i != HCTX_TYPE_POLL && offset)
+-			blk_mq_pci_map_queues(map, to_pci_dev(dev->dev), offset);
+-		else
+-			blk_mq_map_queues(map);
++		blk_mq_map_queues(map);
++
+ 		qoff += map->nr_queues;
+ 		offset += map->nr_queues;
+ 	}
+@@ -2216,6 +2214,8 @@ static int nvme_setup_irqs(struct nvme_d
+ 		.priv		= dev,
+ 	};
+ 	unsigned int irq_queues, poll_queues;
++	unsigned int affvecs;
++	int nr_irqs;
+ 
+ 	/*
+ 	 * Poll queues don't need interrupts, but we need at least one I/O queue
+@@ -2239,8 +2239,19 @@ static int nvme_setup_irqs(struct nvme_d
+ 	irq_queues = 1;
+ 	if (!(dev->ctrl.quirks & NVME_QUIRK_SINGLE_VECTOR))
+ 		irq_queues += (nr_io_queues - poll_queues);
+-	return pci_alloc_irq_vectors_affinity(pdev, 1, irq_queues,
+-			      PCI_IRQ_ALL_TYPES | PCI_IRQ_AFFINITY, &affd);
++
++	nr_irqs = pci_alloc_irq_vectors_affinity(pdev, 1, irq_queues, PCI_IRQ_ALL_TYPES, NULL);
++
++	if (nr_irqs > 0) {
++		if (nr_irqs > affd.pre_vectors)
++			affvecs = nr_irqs - affd.pre_vectors;
++		else
++			affvecs = 0;
++
++		nvme_calc_irq_sets(&affd, affvecs);
++	}
++
++	return nr_irqs;
+ }
+ 
+ static unsigned int nvme_max_io_queues(struct nvme_dev *dev)
