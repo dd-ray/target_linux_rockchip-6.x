@@ -1,0 +1,90 @@
+From fcffc7572e6d158bea1574913b6d00723ea3ac72 Mon Sep 17 00:00:00 2001
+From: Chunguang Xu <brookxu@tencent.com>
+Date: Fri, 22 Apr 2022 18:58:26 +0800
+Subject: [PATCH] nvme-pci: allowed to modify IRQ affinity in latency sensitive
+ scenarios
+
+In most cases, setting the affinity through managed IRQ is a
+better choice. But in some scenarios that use isolcpus, such as DPDK, because
+managed IRQ does not distinguish between housekeeping CPU and isolated CPU
+when selecting CPU, this will cause IO interrupts triggered by housekeeping
+CPU to be routed to isolated CPU, which will affect the tasks running on
+isolated CPU. commit 11ea68f553e2 ("genirq, sched/isolation: Isolate from
+handling managed interrupts") tries to fix this in a best effort way.
+However, in a real production environment, latency-sensitive business needs
+more of a deterministic result. So, similar to the mpt3sas driver, we might
+can add a module parameter smp_affinity_enable to the Nvme driver.
+
+By default, we use managed IRQ. When smp_affinity_enable is set to 0,
+we alloc normal interrupts for Nvme. Therefore, users can modify the
+interrupt affinity according to their actual needs when the managed IRQ
+cannot satisfy them. This method is not a good choice in most scenarios.
+But for users who clear what they are doing, it may be better than not
+being able to do anything.
+
+Signed-off-by: Chunguang Xu <brookxu@tencent.com>
+---
+ drivers/nvme/host/pci.c | 30 +++++++++++++++++++++++++++---
+ 1 file changed, 27 insertions(+), 3 deletions(-)
+
+--- a/drivers/nvme/host/pci.c
++++ b/drivers/nvme/host/pci.c
+@@ -75,6 +75,10 @@ static unsigned int io_queue_depth = 102
+ module_param_cb(io_queue_depth, &io_queue_depth_ops, &io_queue_depth, 0644);
+ MODULE_PARM_DESC(io_queue_depth, "set io queue depth, should >= 2 and < 4096");
+ 
++static unsigned int smp_affinity_enable = 0;
++module_param(smp_affinity_enable, uint, 0644);
++MODULE_PARM_DESC(smp_affinity_enable, "SMP affinity feature enable/disable Default: disable(0)");
++
+ static int io_queue_count_set(const char *val, const struct kernel_param *kp)
+ {
+ 	unsigned int n;
+@@ -456,7 +460,7 @@ static void nvme_pci_map_queues(struct b
+ 		 * affinity), so use the regular blk-mq cpu mapping
+ 		 */
+ 		map->queue_offset = qoff;
+-		if (i != HCTX_TYPE_POLL && offset)
++		if (i != HCTX_TYPE_POLL && offset && smp_affinity_enable)
+ 			blk_mq_pci_map_queues(map, to_pci_dev(dev->dev), offset);
+ 		else
+ 			blk_mq_map_queues(map);
+@@ -2215,7 +2219,11 @@ static int nvme_setup_irqs(struct nvme_d
+ 		.calc_sets	= nvme_calc_irq_sets,
+ 		.priv		= dev,
+ 	};
++	struct irq_affinity *p_affd = &affd;
+ 	unsigned int irq_queues, poll_queues;
++	unsigned int flags = PCI_IRQ_ALL_TYPES;
++	unsigned int affvecs;
++	int nr_irqs;
+ 
+ 	/*
+ 	 * Poll queues don't need interrupts, but we need at least one I/O queue
+@@ -2239,8 +2247,24 @@ static int nvme_setup_irqs(struct nvme_d
+ 	irq_queues = 1;
+ 	if (!(dev->ctrl.quirks & NVME_QUIRK_SINGLE_VECTOR))
+ 		irq_queues += (nr_io_queues - poll_queues);
+-	return pci_alloc_irq_vectors_affinity(pdev, 1, irq_queues,
+-			      PCI_IRQ_ALL_TYPES | PCI_IRQ_AFFINITY, &affd);
++
++	if (smp_affinity_enable)
++		flags |= PCI_IRQ_AFFINITY;
++	else
++		p_affd = NULL;
++
++	nr_irqs = pci_alloc_irq_vectors_affinity(pdev, 1, irq_queues, flags, p_affd);
++
++	if (nr_irqs > 0 && !smp_affinity_enable) {
++		if (nr_irqs > affd.pre_vectors)
++			affvecs = nr_irqs - affd.pre_vectors;
++		else
++			affvecs = 0;
++
++		nvme_calc_irq_sets(&affd, affvecs);
++	}
++
++	return nr_irqs;
+ }
+ 
+ static unsigned int nvme_max_io_queues(struct nvme_dev *dev)

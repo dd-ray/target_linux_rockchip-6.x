@@ -1,0 +1,50 @@
+#!/bin/sh /etc/rc.common
+
+. /lib/functions/uci-defaults.sh
+
+START=00
+
+get_device_irq() {
+	local device="$1"
+	local line
+	local seconds="0"
+
+	while [ "${seconds}" -le 10 ]; do
+		line=$(grep -m 1 "${device}\$" /proc/interrupts) && break
+		seconds="$(( seconds + 2 ))"
+		sleep 2
+	done
+	echo ${line} | sed 's/:.*//'
+}
+
+set_smp_affinity() {
+	local core_mask="$1"
+	local interface="$2"
+
+	[ -z "$interface" ] && return 0
+
+	local irq=$(get_device_irq "$interface")
+	echo "${core_mask}" > /proc/irq/${irq}/smp_affinity
+}
+
+start() {
+	case "$(board_name)" in
+		friendlyarm,nanopi-r5s)
+			set_smp_affinity "1" "nvme0q1"
+			set_smp_affinity "4" "nvme0q2"
+			set_smp_affinity "2" "nvme0q3"
+			set_smp_affinity "8" "nvme0q4"
+		;;
+	esac
+}
+
+stop() {
+	case "$(board_name)" in
+		friendlyarm,nanopi-r5s)
+			nvme_interrupts=$(grep nvme /proc/interrupts | awk '{print $9}')
+			echo "$nvme_interrupts" | while IFS= read -r nvme_irq_list; do
+				set_smp_affinity "f" "$nvme_irq_list"
+			done
+		;;
+	esac
+}
