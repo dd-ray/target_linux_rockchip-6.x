@@ -138,7 +138,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	if (alloc_lpis) {
  		lpi_map = its_lpi_alloc(nvecs, &lpi_base, &nr_lpis);
  		if (lpi_map)
-@@ -4779,6 +4816,13 @@ static bool its_set_non_coherent(void *d
+@@ -4774,6 +4811,13 @@ static bool its_set_non_coherent(void *d
  	return true;
  }
  
@@ -152,7 +152,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  static const struct gic_quirk its_quirks[] = {
  #ifdef CONFIG_CAVIUM_ERRATUM_22375
  	{
-@@ -4833,6 +4877,14 @@ static const struct gic_quirk its_quirks
+@@ -4828,6 +4872,14 @@ static const struct gic_quirk its_quirks
  		.init   = its_enable_rk3588001,
  	},
  #endif
@@ -167,7 +167,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	{
  		.desc   = "ITS: non-coherent attribute",
  		.property = "dma-noncoherent",
-@@ -5094,6 +5146,7 @@ static int __init its_probe_one(struct i
+@@ -5089,6 +5141,7 @@ static int __init its_probe_one(struct i
  	struct page *page;
  	u32 ctlr;
  	int err;
@@ -175,7 +175,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  
  	its_enable_quirks(its);
  
-@@ -5127,7 +5180,9 @@ static int __init its_probe_one(struct i
+@@ -5122,7 +5175,9 @@ static int __init its_probe_one(struct i
  		}
  	}
  
@@ -186,7 +186,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  				get_order(ITS_CMD_QUEUE_SZ));
  	if (!page) {
  		err = -ENOMEM;
-@@ -5153,6 +5208,9 @@ static int __init its_probe_one(struct i
+@@ -5148,6 +5203,9 @@ static int __init its_probe_one(struct i
  	gits_write_cbaser(baser, its->base + GITS_CBASER);
  	tmp = gits_read_cbaser(its->base + GITS_CBASER);
  

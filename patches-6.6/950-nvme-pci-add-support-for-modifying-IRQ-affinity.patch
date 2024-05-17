@@ -9,12 +9,12 @@ Modify the nvme pci controller to allow users to modify interrupt affinity accor
 
 Signed-off-by: sbwml <admin@cooluc.com>
 ---
- drivers/nvme/host/pci.c | 23 +++++++++++++++++------
- 1 file changed, 17 insertions(+), 6 deletions(-)
+ drivers/nvme/host/pci.c | 22 ++++++++++++++++------
+ 1 file changed, 16 insertions(+), 6 deletions(-)
 
 --- a/drivers/nvme/host/pci.c
 +++ b/drivers/nvme/host/pci.c
-@@ -456,10 +456,8 @@ static void nvme_pci_map_queues(struct b
+@@ -456,10 +456,7 @@ static void nvme_pci_map_queues(struct b
  		 * affinity), so use the regular blk-mq cpu mapping
  		 */
  		map->queue_offset = qoff;
@@ -23,25 +23,24 @@ Signed-off-by: sbwml <admin@cooluc.com>
 -		else
 -			blk_mq_map_queues(map);
 +		blk_mq_map_queues(map);
-+
  		qoff += map->nr_queues;
  		offset += map->nr_queues;
  	}
-@@ -2216,6 +2214,8 @@ static int nvme_setup_irqs(struct nvme_d
- 		.priv		= dev,
+@@ -2217,6 +2214,8 @@ static int nvme_setup_irqs(struct nvme_d
  	};
  	unsigned int irq_queues, poll_queues;
+ 	unsigned int flags = PCI_IRQ_ALL_TYPES | PCI_IRQ_AFFINITY;
 +	unsigned int affvecs;
 +	int nr_irqs;
  
  	/*
  	 * Poll queues don't need interrupts, but we need at least one I/O queue
-@@ -2239,8 +2239,19 @@ static int nvme_setup_irqs(struct nvme_d
- 	irq_queues = 1;
- 	if (!(dev->ctrl.quirks & NVME_QUIRK_SINGLE_VECTOR))
+@@ -2242,8 +2241,19 @@ static int nvme_setup_irqs(struct nvme_d
  		irq_queues += (nr_io_queues - poll_queues);
--	return pci_alloc_irq_vectors_affinity(pdev, 1, irq_queues,
--			      PCI_IRQ_ALL_TYPES | PCI_IRQ_AFFINITY, &affd);
+ 	if (dev->ctrl.quirks & NVME_QUIRK_BROKEN_MSI)
+ 		flags &= ~PCI_IRQ_MSI;
+-	return pci_alloc_irq_vectors_affinity(pdev, 1, irq_queues, flags,
+-					      &affd);
 +
 +	nr_irqs = pci_alloc_irq_vectors_affinity(pdev, 1, irq_queues, PCI_IRQ_ALL_TYPES, NULL);
 +
