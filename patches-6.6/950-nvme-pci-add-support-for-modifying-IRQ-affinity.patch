@@ -26,7 +26,7 @@ Signed-off-by: sbwml <admin@cooluc.com>
  		qoff += map->nr_queues;
  		offset += map->nr_queues;
  	}
-@@ -2217,6 +2214,8 @@ static int nvme_setup_irqs(struct nvme_d
+@@ -2223,6 +2220,8 @@ static int nvme_setup_irqs(struct nvme_d
  	};
  	unsigned int irq_queues, poll_queues;
  	unsigned int flags = PCI_IRQ_ALL_TYPES | PCI_IRQ_AFFINITY;
@@ -35,7 +35,7 @@ Signed-off-by: sbwml <admin@cooluc.com>
  
  	/*
  	 * Poll queues don't need interrupts, but we need at least one I/O queue
-@@ -2242,8 +2241,19 @@ static int nvme_setup_irqs(struct nvme_d
+@@ -2248,8 +2247,19 @@ static int nvme_setup_irqs(struct nvme_d
  		irq_queues += (nr_io_queues - poll_queues);
  	if (dev->ctrl.quirks & NVME_QUIRK_BROKEN_MSI)
  		flags &= ~PCI_IRQ_MSI;
