@@ -105,7 +105,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	if (alloc_lpis) {
  		lpi_map = its_lpi_alloc(nvecs, &lpi_base, &nr_lpis);
  		if (lpi_map)
-@@ -4743,6 +4766,21 @@ static bool __maybe_unused its_enable_qu
+@@ -4759,6 +4782,21 @@ static bool __maybe_unused its_enable_qu
  	return true;
  }
  
@@ -127,7 +127,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  static bool __maybe_unused its_enable_rk3588001(void *data)
  {
  	struct its_node *its = data;
-@@ -4813,6 +4851,12 @@ static const struct gic_quirk its_quirks
+@@ -4829,6 +4867,12 @@ static const struct gic_quirk its_quirks
  #endif
  #ifdef CONFIG_ROCKCHIP_ERRATUM_3588001
  	{
@@ -140,7 +140,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  		.desc   = "ITS: Rockchip erratum RK3588001",
  		.iidr   = 0x0201743b,
  		.mask   = 0xffffffff,
-@@ -5081,6 +5125,7 @@ static int __init its_probe_one(struct i
+@@ -5097,6 +5141,7 @@ static int __init its_probe_one(struct i
  {
  	u64 baser, tmp;
  	struct page *page;
@@ -148,7 +148,7 @@ Subject: [PATCH] irqchip: gic-v3: add hackaround for rk3568 its
  	u32 ctlr;
  	int err;
  
-@@ -5116,7 +5161,9 @@ static int __init its_probe_one(struct i
+@@ -5132,7 +5177,9 @@ static int __init its_probe_one(struct i
  		}
  	}
  
