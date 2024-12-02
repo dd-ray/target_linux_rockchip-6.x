@@ -18,7 +18,7 @@
  
 --- a/drivers/usb/dwc3/core.c
 +++ b/drivers/usb/dwc3/core.c
-@@ -1614,6 +1614,8 @@ static void dwc3_get_properties(struct d
+@@ -1620,6 +1620,8 @@ static void dwc3_get_properties(struct d
  				"snps,dis-del-phy-power-chg-quirk");
  	dwc->dis_tx_ipgap_linecheck_quirk = device_property_read_bool(dev,
  				"snps,dis-tx-ipgap-linecheck-quirk");
@@ -39,7 +39,7 @@
   * @resume_hs_terminations: Set if we enable quirk for fixing improper crc
   *			generation after resume from suspend.
   * @ulpi_ext_vbus_drv: Set to confiure the upli chip to drives CPEN pin
-@@ -1335,6 +1338,7 @@ struct dwc3 {
+@@ -1337,6 +1340,7 @@ struct dwc3 {
  	unsigned		dis_u2_freeclk_exists_quirk:1;
  	unsigned		dis_del_phy_power_chg_quirk:1;
  	unsigned		dis_tx_ipgap_linecheck_quirk:1;
@@ -120,7 +120,7 @@
  						  &trb_buff_len,
 --- a/drivers/usb/host/xhci.h
 +++ b/drivers/usb/host/xhci.h
-@@ -1531,7 +1531,11 @@ static inline const char *xhci_trb_type_
+@@ -1275,7 +1275,11 @@ static inline const char *xhci_trb_type_
  #define TRB_SEGMENT_SIZE	(TRBS_PER_SEGMENT*16)
  #define TRB_SEGMENT_SHIFT	(ilog2(TRB_SEGMENT_SIZE))
  /* TRB buffer pointers can't cross 64KB boundaries */
@@ -132,7 +132,7 @@
  #define TRB_MAX_BUFF_SIZE	(1 << TRB_MAX_BUFF_SHIFT)
  /* How much data is left before the 64KB boundary? */
  #define TRB_BUFF_LEN_UP_TO_BOUNDARY(addr)	(TRB_MAX_BUFF_SIZE - \
-@@ -1856,6 +1860,7 @@ struct xhci_hcd {
+@@ -1600,6 +1604,7 @@ struct xhci_hcd {
  #define XHCI_STATE_HALTED	(1 << 1)
  #define XHCI_STATE_REMOVING	(1 << 2)
  	unsigned long long	quirks;
