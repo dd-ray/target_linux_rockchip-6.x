@@ -1,6 +1,6 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3568.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3568.dtsi
-@@ -272,7 +272,7 @@
+@@ -273,7 +273,7 @@
  &cpu0_opp_table {
  	opp-1992000000 {
  		opp-hz = /bits/ 64 <1992000000>;
