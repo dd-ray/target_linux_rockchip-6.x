@@ -29,7 +29,7 @@
  	dwc->ulpi_ext_vbus_drv = device_property_read_bool(dev,
 --- a/drivers/usb/dwc3/core.h
 +++ b/drivers/usb/dwc3/core.h
-@@ -1134,6 +1134,9 @@ struct dwc3_scratchpad_array {
+@@ -1133,6 +1133,9 @@ struct dwc3_scratchpad_array {
   *			change quirk.
   * @dis_tx_ipgap_linecheck_quirk: set if we disable u2mac linestate
   *			check during HS transmit.
@@ -39,7 +39,7 @@
   * @resume_hs_terminations: Set if we enable quirk for fixing improper crc
   *			generation after resume from suspend.
   * @ulpi_ext_vbus_drv: Set to confiure the upli chip to drives CPEN pin
-@@ -1373,6 +1376,7 @@ struct dwc3 {
+@@ -1372,6 +1375,7 @@ struct dwc3 {
  	unsigned		dis_u2_freeclk_exists_quirk:1;
  	unsigned		dis_del_phy_power_chg_quirk:1;
  	unsigned		dis_tx_ipgap_linecheck_quirk:1;
