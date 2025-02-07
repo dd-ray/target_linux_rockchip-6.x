@@ -53,8 +53,8 @@
  		num-lanes = <2>;
  		phys = <&pcie30phy>;
  		phy-names = "pcie-phy";
---- a/arch/arm64/boot/dts/rockchip/rk356x.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk356x.dtsi
+--- a/arch/arm64/boot/dts/rockchip/rk356x-base.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk356x-base.dtsi
 @@ -358,14 +358,21 @@
  
  	gic: interrupt-controller@fd400000 {

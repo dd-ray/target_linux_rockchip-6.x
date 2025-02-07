@@ -1,6 +1,6 @@
---- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
-@@ -68,6 +68,15 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtsi
+@@ -66,6 +66,15 @@
  	status = "disabled";
  };
  

@@ -5,13 +5,13 @@ Subject: [PATCH] rockchip: add pwm-fan controller for nanopi r2s/r4s
 
 Signed-off-by: sbwml <admin@cooluc.com>
 ---
- arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts | 8 ++++++++
- arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts | 8 ++++++++
+ arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2.dtsi | 8 ++++++++
+ arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtsi | 8 ++++++++
  2 files changed, 16 insertions(+)
 
---- a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts
-@@ -115,6 +115,14 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2.dtsi
+@@ -112,6 +112,14 @@
  		regulator-boot-on;
  		vin-supply = <&vdd_5v>;
  	};
@@ -26,11 +26,11 @@ Signed-off-by: sbwml <admin@cooluc.com>
  };
  
  &cpu0 {
---- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
-@@ -69,6 +69,14 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtsi
+@@ -67,6 +67,14 @@
  		regulator-always-on;
- 		regulator-boot-on;
+		regulator-boot-on;
  	};
 +
 +	fan: pwm-fan {

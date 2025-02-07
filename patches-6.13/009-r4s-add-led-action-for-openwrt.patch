@@ -1,8 +1,7 @@
---- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
-@@ -19,6 +19,13 @@
- 	model = "FriendlyElec NanoPi R4S";
- 	compatible = "friendlyarm,nanopi-r4s", "rockchip,rk3399";
+--- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtsi
+@@ -20,3 +20,10 @@
+ 	/delete-node/ display-subsystem;
  
 +	aliases {
 +		led-boot = &sys_led;
@@ -11,6 +10,4 @@
 +		led-upgrade = &sys_led;
 +	};
 +
- 	/delete-node/ display-subsystem;
- 
  	gpio-leds {
