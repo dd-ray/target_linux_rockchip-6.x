@@ -30,7 +30,7 @@ Change-Id: Id365aba7a73f02cc2c61882b46937250e64af01c
  {
  	bool ret;
  
-@@ -341,3 +342,5 @@ void pcie_aspm_ext_l1ss_enable(struct pc
+@@ -340,3 +340,5 @@ void pcie_aspm_ext_l1ss_enable(struct pc
  		rockchip_pcie_bus_aspm_enable_rc_ep(child, parent, true);
  }
  EXPORT_SYMBOL(pcie_aspm_ext_l1ss_enable);
