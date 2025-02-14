@@ -1,0 +1,183 @@
+diff --git a/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5c.dts b/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5c.dts
+--- a/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5c.dts	(revision 0da4b4b84ffe5efe12f5fd96dd294aa9d20ba2de)
++++ b/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5c.dts	(date 1739522310338)
+@@ -31,28 +31,23 @@
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&lan_led_pin>, <&power_led_pin>, <&wan_led_pin>, <&wlan_led_pin>;
+ 
+-		led-lan {
+-			color = <LED_COLOR_ID_GREEN>;
+-			function = LED_FUNCTION_LAN;
++		lan_led: led-lan {
++			label = "green:lan";
+ 			gpios = <&gpio3 RK_PA3 GPIO_ACTIVE_HIGH>;
+ 		};
+ 
+ 		power_led: led-power {
+-			color = <LED_COLOR_ID_RED>;
+-			function = LED_FUNCTION_POWER;
+-			linux,default-trigger = "heartbeat";
++			label = "red:power";
+ 			gpios = <&gpio3 RK_PA2 GPIO_ACTIVE_HIGH>;
+ 		};
+ 
+-		led-wan {
+-			color = <LED_COLOR_ID_GREEN>;
+-			function = LED_FUNCTION_WAN;
++		led_wan: led-wan {
++			label = "green:wan";
+ 			gpios = <&gpio3 RK_PA4 GPIO_ACTIVE_HIGH>;
+ 		};
+ 
+-		led-wlan {
+-			color = <LED_COLOR_ID_GREEN>;
+-			function = LED_FUNCTION_WLAN;
++		wlan_led: led-wlan {
++			label = "green:wlan";
+ 			gpios = <&gpio3 RK_PA5 GPIO_ACTIVE_HIGH>;
+ 		};
+ 	};
+diff --git a/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dts b/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dts
+--- a/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dts	(revision 0da4b4b84ffe5efe12f5fd96dd294aa9d20ba2de)
++++ b/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dts	(date 1739522280425)
+@@ -17,35 +17,36 @@
+ 		ethernet0 = &gmac0;
+ 	};
+ 
++	fan: pwm-fan {
++		compatible = "pwm-fan";
++		cooling-levels = <0 18 60 100 255>;
++		#cooling-cells = <2>;
++		fan-supply = <&vcc5v0_sys>;
++		pwms = <&pwm0 0 50000 0>;
++	};
++
+ 	gpio-leds {
+ 		compatible = "gpio-leds";
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&lan1_led_pin>, <&lan2_led_pin>, <&power_led_pin>, <&wan_led_pin>;
+ 
+-		led-lan1 {
+-			color = <LED_COLOR_ID_GREEN>;
+-			function = LED_FUNCTION_LAN;
+-			function-enumerator = <1>;
++		lan1_led: led-lan1 {
++			label = "green:lan1";
+ 			gpios = <&gpio3 RK_PD6 GPIO_ACTIVE_HIGH>;
+ 		};
+ 
+-		led-lan2 {
+-			color = <LED_COLOR_ID_GREEN>;
+-			function = LED_FUNCTION_LAN;
+-			function-enumerator = <2>;
++		lan2_led: led-lan2 {
++			label = "green:lan2";
+ 			gpios = <&gpio3 RK_PD7 GPIO_ACTIVE_HIGH>;
+ 		};
+ 
+ 		power_led: led-power {
+-			color = <LED_COLOR_ID_RED>;
+-			function = LED_FUNCTION_POWER;
+-			linux,default-trigger = "heartbeat";
++			label = "red:power";
+ 			gpios = <&gpio4 RK_PD2 GPIO_ACTIVE_HIGH>;
+ 		};
+ 
+-		led-wan {
+-			color = <LED_COLOR_ID_GREEN>;
+-			function = LED_FUNCTION_WAN;
++		wan_led: led-wan {
++			label = "green:wan";
+ 			gpios = <&gpio2 RK_PC1 GPIO_ACTIVE_HIGH>;
+ 		};
+ 	};
+@@ -133,4 +134,14 @@
+ 			rockchip,pins = <2 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
++
++	gpio-key {
++        	key1_pin: key1-pin {
++        		rockchip,pins = <4 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>;
++        	};
++        };
++};
++
++&pwm0 {
++	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dtsi b/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dtsi
+--- a/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dtsi	(revision 0da4b4b84ffe5efe12f5fd96dd294aa9d20ba2de)
++++ b/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dtsi	(date 1739521916101)
+@@ -18,12 +18,32 @@
+ 	aliases {
+ 		mmc0 = &sdmmc0;
+ 		mmc1 = &sdhci;
++
++		led-boot = &power_led;
++		led-failsafe = &power_led;
++		led-running = &power_led;
++		led-upgrade = &power_led;
+ 	};
+ 
+ 	chosen: chosen {
+ 		stdout-path = "serial2:1500000n8";
+ 	};
+ 
++	firmware {
++		optee: optee {
++			compatible = "linaro,optee-tz";
++			method = "smc";
++		};
++	};
++
++	cspmu: cspmu@fd90c000 {
++		compatible = "rockchip,cspmu";
++		reg = <0x0 0xfd90c000 0x0 0x1000>,
++			<0x0 0xfd90d000 0x0 0x1000>,
++			<0x0 0xfd90e000 0x0 0x1000>,
++			<0x0 0xfd90f000 0x0 0x1000>;
++	};
++
+ 	hdmi-con {
+ 		compatible = "hdmi-connector";
+ 		type = "a";
+@@ -75,6 +95,17 @@
+ 		vin-supply = <&vcc5v0_sys>;
+ 	};
+ 
++	vcc3v3_ngff: regulator-vcc3v3-ngff {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3_ngff";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		enable-active-high;
++		gpio = <&gpio4 RK_PC1 GPIO_ACTIVE_HIGH>;
++		startup-delay-us = <50000>;
++		vin-supply = <&vcc3v3_pcie>;
++	};
++
+ 	vcc5v0_usb: regulator-vcc5v0-usb {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc5v0_usb";
+@@ -215,7 +246,7 @@
+ 		#clock-cells = <1>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pmic_int>;
+-		system-power-controller;
++		rockchip,system-power-controller;
+ 		vcc1-supply = <&vcc3v3_sys>;
+ 		vcc2-supply = <&vcc3v3_sys>;
+ 		vcc3-supply = <&vcc3v3_sys>;
+@@ -436,6 +467,11 @@
+ &i2s0_8ch {
+ 	status = "okay";
+ };
++
++&i2s1_8ch {
++	rockchip,trcm-sync-tx-only;
++	status = "okay";
++};
+ 
+ &pcie30phy {
+ 	data-lanes = <1 2>;
