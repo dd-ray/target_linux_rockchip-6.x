@@ -1,0 +1,82 @@
+diff --git a/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dts b/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dts
+--- a/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dts	(revision 330f7746b95a60a9f5bdc3bcbecaa28ae844a855)
++++ b/arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5s.dts	(date 1739589719418)
+@@ -78,6 +78,8 @@
+ 	rgmii_phy0: ethernet-phy@1 {
+ 		compatible = "ethernet-phy-ieee802.3-c22";
+ 		reg = <1>;
++		interrupt-parent = <&gpio0>;
++		interrupts = <RK_PC4 IRQ_TYPE_LEVEL_LOW>;
+ 		pinctrl-0 = <&eth_phy0_reset_pin>;
+ 		pinctrl-names = "default";
+ 	};
+@@ -87,6 +89,17 @@
+ 	num-lanes = <1>;
+ 	reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
++
++	pcie@0,0 {
++		reg = <0x00000000 0 0 0 0>;
++		#address-cells = <3>;
++		#size-cells = <2>;
++
++		r8125_1: pcie@1,0 {
++		reg = <0x000000 0 0 0 0>;
++			local-mac-address = [ 00 00 00 00 00 00 ];
++		};
++	};
+ };
+ 
+ &pcie30phy {
+@@ -99,6 +112,17 @@
+ 	reset-gpios = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
+ 	vpcie3v3-supply = <&vcc3v3_pcie>;
+ 	status = "okay";
++
++	pcie@0,0 {
++		reg = <0x00100000 0 0 0 0>;
++		#address-cells = <3>;
++		#size-cells = <2>;
++
++		r8125_2: pcie@10,0 {
++			reg = <0x000000 0 0 0 0>;
++			local-mac-address = [ 00 00 00 00 00 00 ];
++		};
++	};
+ };
+ 
+ &pcie3x2 {
+@@ -145,3 +169,33 @@
+ &pwm0 {
+ 	status = "okay";
+ };
++
++&pwm7 {
++	compatible = "rockchip,remotectl-pwm";
++	pinctrl-names = "default";
++	pinctrl-0 = <&pwm7_pins>;
++	remote_pwm_id = <7>;
++	handle_cpu_id = <1>;
++	remote_support_psci = <0>;
++	status = "okay";
++
++	ir_key1 {
++		rockchip,usercode = <0xc43b>;
++		rockchip,key_table =
++			<0xff	KEY_POWER>,
++			<0xef	KEY_LEFT>,
++			<0xed	KEY_RIGHT>,
++			<0xf2	KEY_UP>,
++			<0xea	KEY_DOWN>,
++			<0xee	KEY_ENTER>,
++			<0xe9	KEY_MUTE>,
++			<0xf1	KEY_VOLUMEDOWN>,
++			<0xf3	KEY_VOLUMEUP>,
++			<0xae	KEY_MENU>,
++			<0xeb	KEY_LEFTMETA>,
++			<0xaf	KEY_BACK>,
++			<0xf7	KEY_MODE>,
++			<0xe5	KEY_SYSRQ>,
++			<0xf5	KEY_ESC>;
++	};
++};
